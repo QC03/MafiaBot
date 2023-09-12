@@ -1,2 +1,4 @@
 /.env
 /get-pip.py
+*.pyc
+.gitignore
