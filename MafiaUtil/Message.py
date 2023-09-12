@@ -1,5 +1,6 @@
 
 import discord
+from Database.PlayData.UserList import UserList
 
 class MsgUtil:
 
@@ -10,9 +11,9 @@ class MsgUtil:
         embed = discord.Embed(title="ERROR", description=f"{msg}", color=0x2ecc71)
         return embed
     
-    def startMsg(self):
+    def startMsg(self, userlistObj: UserList):
         embed = discord.Embed(title="마피아", description="마피아 시작", color=0x2ecc71)
-        for user in self.getUserList():
+        for user in userlistObj.getUserList():
             embed.add_field(name=f"{user}", value="", inline=False)
         return embed
 
