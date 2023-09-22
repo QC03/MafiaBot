@@ -2,7 +2,7 @@
 import discord
 import random
 import time
-from Database.PlayData.UserList import UserList
+from Database.UserList import UserList
 from Database.Channel import mafiaChannel
 from MafiaUtil.MafiaRole import mafiaRole
 from Database.Role import mafiaDefaultRole
@@ -10,8 +10,9 @@ from MafiaUtil.Vote import Vote, DropdownView
 
 class Mafia():
 
-    def __init__(self, userListObj: UserList, mafiaChannelObj: mafiaChannel, mafiaDefaultRoleObj: mafiaDefaultRole):
+    def __init__(self, userListObj: UserList, playChannelObj: mafiaChannel, mafiaChannelObj: mafiaChannel, mafiaDefaultRoleObj: mafiaDefaultRole):
         self.userListObj = userListObj
+        self.playChannelObj = playChannelObj
         self.mafiaChannelObj = mafiaChannelObj
         self.mafiaDefaultRoleObj = mafiaDefaultRoleObj
 
@@ -61,7 +62,8 @@ class Mafia():
 
     async def startMafia(self):
 
-        channel = self.mafiaChannelObj.getChannel()
+        channel = self.playChannelObj.getChannel()
+        mafia_Channel = self.mafiaChannelObj.getChannel()
         userList = self.userListObj.getUserList()
 
         await self.giveMafiaRole()
@@ -69,6 +71,14 @@ class Mafia():
         self.splitTeam()
         mafiarole = mafiaRole(self.mafiaTeam, self.citizenTeam)
         await mafiarole.autoSelect()
+
+        for user in userList:
+            await mafia_Channel.set_permissions(user, read_messages=False, send_messages=False)
+            await channel.set_permissions(user, read_messages=True, send_messages=True)
+
+        for mafiaUser in self.mafiaTeam:
+            await mafia_Channel.set_permissions(mafiaUser, read_messages=True, send_messages=True)
+            await channel.set_permissions(mafiaUser, read_messages=True, send_messages=True)
 
         await channel.send(embed=discord.Embed(title="마피아", description="마피아 게임이 시작되었습니다.", color=0x2ecc71))
 
@@ -78,6 +88,11 @@ class Mafia():
             
             time.sleep(10)
             voteObj = Vote()
+
+            for user in userList:
+                await mafia_Channel.set_permissions(user, send_messages=False)
+                await channel.set_permissions(user, send_messages=False)
+
             await channel.send(embed=discord.Embed(title="마피아", description="아래 메뉴에서 투표해주세요!", color=0x2ecc71), view=DropdownView(userList=userList, voteObj=voteObj, deadList=self.deadList))
 
             time.sleep(20)
@@ -103,4 +118,12 @@ class Mafia():
 
 
             await channel.send(embed=voteResultEmbed)
+
+            for user in userList:
+                await channel.set_permissions(user, send_messages=True)
+
+            for mafiaUser in self.mafiaTeam:
+                await mafia_Channel.set_permissions(mafiaUser, send_messages=True)
+
+            await channel.send(embed=discord.Embed(title="마피아", description="밤이 되었습니다.", color=0x2ecc71))
 

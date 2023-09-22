@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 
 import discord
 from MafiaUtil.Message import MsgUtil
-from Database.PlayData.UserList import UserList
+from Database.UserList import UserList
 from Database.Channel import mafiaChannel
 from Database.Role import mafiaDefaultRole
 from MafiaUtil.Game import Mafia
@@ -17,8 +17,9 @@ token = os.getenv("TOKEN")
 msgObj = MsgUtil()
 userListObj = UserList()
 mafiaDefaultRoleObj = mafiaDefaultRole()
+playChannelObj = mafiaChannel()
 mafiaChannelObj = mafiaChannel()
-mafia = Mafia(userListObj, mafiaChannelObj, mafiaDefaultRoleObj)
+mafia = Mafia(userListObj, playChannelObj, mafiaDefaultRoleObj)
 
 @bot.slash_command(name="마피아유저", description="마피아 유저관련 명령어", guild_ids=[guild])
 async def mafiaUserCmd(
@@ -92,8 +93,8 @@ async def mafiaRoleCmd(
 
     mafiaDefaultRoleObj.setRole(role)
 
-    if (mafiaChannelObj.isSet() == True):
-        await mafiaChannelObj.getChannel().set_permissions(mafiaDefaultRoleObj.getRole(), read_messages=True, send_messages=True)
+    if (playChannelObj.isSet() == True):
+        await playChannelObj.getChannel().set_permissions(mafiaDefaultRoleObj.getRole(), read_messages=True, send_messages=True)
 
     await ctx.respond(embed=discord.Embed(title="마피아", description=f"마피아 참여역할을 {role.name}(으)로 지정하였습니다.", color=0x2ecc71))
 
@@ -101,6 +102,7 @@ async def mafiaRoleCmd(
 @bot.slash_command(name="마피아채널", description="마피아를 플레이할 채널을 지정합니다.", guild_ids=[guild])
 async def mafiaChannelCmd(
     ctx: discord.ApplicationContext,
+    type: discord.Option(str, choices=["마피아", "일반"]),
     channel: discord.TextChannel,
     ):
 
@@ -110,12 +112,17 @@ async def mafiaChannelCmd(
         await ctx.respond(embed = msgObj.errorMsg("마피아 참여역할을 먼저 지정해주세요."))
         return
 
-    mafiaChannelObj.setChannel(channel=channel)
+    if (type == "마피아"):
+        mafiaChannelObj.setChannel(channel=channel)
+    elif (type == "일반"):
+        playChannelObj.setChannel(channel=channel)
+    else:
+        return
 
     await channel.set_permissions(ctx.guild.default_role, read_messages=False, send_messages=False)
     await channel.set_permissions(mafiaDefaultRoleObj.getRole(), read_messages=True, send_messages=True)
 
-    await ctx.respond(embed=discord.Embed(title="마피아", description=f"마피아 채널을 {channel}(으)로 지정하였습니다.", color=0x2ecc71))
+    await ctx.respond(embed=discord.Embed(title="마피아", description=f"{type} 채널을 {channel}(으)로 지정하였습니다.", color=0x2ecc71))
 
 
 

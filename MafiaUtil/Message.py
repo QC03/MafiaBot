@@ -1,6 +1,6 @@
 
 import discord
-from Database.PlayData.UserList import UserList
+from Database.UserList import UserList
 
 class MsgUtil:
 
