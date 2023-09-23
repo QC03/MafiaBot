@@ -3,10 +3,10 @@ from dotenv import load_dotenv
 
 import discord
 from MafiaUtil.Message import MsgUtil
-from Database.UserList import UserList
-from Database.Channel import mafiaChannel
-from Database.Role import mafiaDefaultRole
-from MafiaUtil.Game import Mafia
+from Database.GameData.UserList import UserList
+from Database.DiscordData.Channel import mafiaChannel
+from Database.DiscordData.Role import mafiaDefaultRole
+from GamePlay.Game import Mafia
 
 bot = discord.Bot()
 

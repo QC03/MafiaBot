@@ -2,10 +2,10 @@
 import discord
 import random
 import time
-from Database.UserList import UserList
-from Database.Channel import mafiaChannel
-from MafiaUtil.MafiaRole import mafiaRole
-from Database.Role import mafiaDefaultRole
+from Database.GameData.UserList import UserList
+from Database.DiscordData.Channel import mafiaChannel
+from Database.GameData.MafiaRole import mafiaRole
+from Database.DiscordData.Role import mafiaDefaultRole
 from MafiaUtil.Vote import Vote, DropdownView
 
 class Mafia():

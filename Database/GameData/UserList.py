@@ -8,23 +8,13 @@ class UserList:
     def getUserList(self):
         return self.mafiaUserList
 
-    def containUserList(self, user: discord.user):
-
-        for loop_user in self.getUserList():
-
-            if (loop_user != user):
-                continue
-            return True
-        
-        return False
-
     def addUserList(self, user: discord.user):
-        if (self.containUserList(user) == True):
+        if (user in self.mafiaUserList == True):
             return
         self.mafiaUserList.append(user)
 
     def removeUserList(self, user: discord.user):
-        if (self.containUserList(user) == False):
+        if (user in self.mafiaUserList == False):
             return
         self.mafiaUserList.remove(user)
 
