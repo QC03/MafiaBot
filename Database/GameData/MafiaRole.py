@@ -1,14 +1,15 @@
 import discord
 import random
+from Database.MafiaDB import MafiaDB
 
 class mafiaRole():
 
-    def __init__(self, mafiaTeam: list, citizenTeam: list):
+    def __init__(self, mafiaDB: MafiaDB):
         self.mafiaRole = dict()
-        self.mafiaTeam = mafiaTeam.copy()
-        self.citizenTeam = citizenTeam.copy()
+        self.mafiaTeam = mafiaDB.mafiaTeam.copy()
+        self.citizenTeam = mafiaDB.citizenTeam.copy()
 
-        self.userSize = len(self.mafiaTeam.copy() + self.citizenTeam.copy())
+        self.userSize = len(self.mafiaTeam + self.citizenTeam)
     
     async def autoSelect(self):
         await self.selectMafia()

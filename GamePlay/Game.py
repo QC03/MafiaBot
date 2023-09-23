@@ -2,23 +2,21 @@
 import discord
 import random
 import time
-from Database.GameData.UserList import UserList
-from Database.DiscordData.Channel import mafiaChannel
+from Database.MafiaDB import MafiaDB
 from Database.GameData.MafiaRole import mafiaRole
-from Database.DiscordData.Role import mafiaDefaultRole
 from MafiaUtil.Vote import Vote, DropdownView
 
 class Mafia():
 
-    def __init__(self, userListObj: UserList, playChannelObj: mafiaChannel, mafiaChannelObj: mafiaChannel, mafiaDefaultRoleObj: mafiaDefaultRole):
-        self.userListObj = userListObj
-        self.playChannelObj = playChannelObj
-        self.mafiaChannelObj = mafiaChannelObj
-        self.mafiaDefaultRoleObj = mafiaDefaultRoleObj
+    def __init__(self, mafiaDB: MafiaDB):
 
-        self.deadList = []
-        self.mafiaTeam = []
-        self.citizenTeam = []
+        self.userListObj = mafiaDB.getUserListObj()
+        self.playChannelObj = mafiaDB.getPlayChannelObj()
+        self.mafiaChannelObj = mafiaDB.getMafiaChannelObj()
+        self.mafiaDefaultRoleObj = mafiaDB.getDefaultRoleObj()
+
+        self.deadList = mafiaDB.getDeadList()
+        self.mafiaDB = mafiaDB
 
     async def giveMafiaRole(self):
 
@@ -34,7 +32,7 @@ class Mafia():
 
     def splitTeam(self):
 
-        userList = self.userListObj.getUserList().copy()
+        userList = self.mafiaDB.userListObj.getUserList().copy()
 
         mafiaSize = 0
         if (len(userList) in range(4, 5)):
@@ -46,30 +44,35 @@ class Mafia():
         else:
             mafiaSize = 4
 
+        mafiaTeam = []
         for i in range(mafiaSize):
             tempUser = random.choice(userList)
-            self.mafiaTeam.append(tempUser)
+            mafiaTeam.append(tempUser)
             userList.remove(tempUser)
 
+        citizenTeam = []
         for user in userList:
 
-            if (user in self.mafiaTeam):
+            if (user in mafiaTeam):
                 continue
    
-            self.citizenTeam.append(user)
+            citizenTeam.append(user)
+        
+        self.mafiaDB.setMafiaTeam(mafiaTeam)
+        self.mafiaDB.setCitizenTeam(citizenTeam)
             
 
 
     async def startMafia(self):
 
-        channel = self.playChannelObj.getChannel()
-        mafia_Channel = self.mafiaChannelObj.getChannel()
-        userList = self.userListObj.getUserList()
+        channel = self.mafiaDB.getPlayChannelObj().getChannel()
+        mafia_Channel = self.mafiaDB.getMafiaChannelObj().getChannel()
+        userList = self.mafiaDB.getUserListObj().getUserList()
 
         await self.giveMafiaRole()
 
         self.splitTeam()
-        mafiarole = mafiaRole(self.mafiaTeam, self.citizenTeam)
+        mafiarole = mafiaRole(self.mafiaDB)
         await mafiarole.autoSelect()
 
         for user in userList:
